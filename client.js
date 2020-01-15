@@ -1,7 +1,8 @@
 const net = require("net");
 
 let client = net.createConnection({port: 3000}, () => {
-    console.log("Connected");
+    console.log("Welcome!");
+    console.log("Commands: quit");
 });
 
 client.on("data", data => {
@@ -9,9 +10,12 @@ client.on("data", data => {
 });
 
 client.on("end", () => {
-
+    console.log("You quit off");
+    process.exit();
 });
 
 client.on("error", (err) => {
     console.log(`Error occurred: ${err}`)
 });
+
+process.stdin.pipe(client);
