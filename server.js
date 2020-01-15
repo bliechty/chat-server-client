@@ -1,4 +1,5 @@
 const uuid = require("uuid");
+const fs = require("fs");
 const net = require("net");
 let users = [];
 let numberOfTotalUsers = 0;
@@ -15,6 +16,13 @@ let server = net.createServer(client => {
         if (data === "quit\n") {
             client.end();
         } else {
+            fs.appendFile("chat.log", `${client.name} (${client.id}) said "${data.trim()}" to all other users\n`, (err) => {
+                if (err) {
+                    console.log(`Error occurred: ${err}`);
+                } else {
+                    console.log("Chat logged to 'chat.log'");
+                }
+            });
             client.write("Message sent to all other users");
             writeMessageToAllOtherUsers(`Message from ${client.name} (${client.id}): ${data}`, client);
             console.log(`Message sent from ${client.name} (${client.id}) to all other users`);
@@ -38,7 +46,7 @@ server.on("end", () => {
 });
 
 server.on("error", (err) => {
-    console.log(`Error occurred: ${err}`)
+    console.log(`Error occurred: ${err}`);
 });
 
 function writeMessageToAllOtherUsers(message, client) {
@@ -48,3 +56,10 @@ function writeMessageToAllOtherUsers(message, client) {
         }
     }
 }
+
+process.stdin.setEncoding("utf-8");
+process.stdin.on("data", data => {
+    if (data === "quit\n") {
+        process.exit();
+    }
+});

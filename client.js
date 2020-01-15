@@ -10,7 +10,7 @@ client.on("data", data => {
 });
 
 client.on("end", () => {
-    console.log("You quit off");
+    console.log("You were quit off");
     process.exit();
 });
 
