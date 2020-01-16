@@ -10,13 +10,7 @@ let server = net.createServer(client => {
     users.push(client);
     numberOfTotalUsers++;
     writeMessageToAllOtherUsers(`${client.name} (${client.id}) connected`, client);
-    fs.appendFile("chat.log", `${client.name} (${client.id}) connected\n`, (err) => {
-        if (err) {
-            console.log(`Error occurred: ${err}`);
-        } else {
-            console.log("Chat logged to 'chat.log'");
-        }
-    });
+    writeToChatLog(`${client.name} (${client.id}) connected\n`);
     console.log(`${client.name} (${client.id}) connected`);
 
     client.on("data", data => {
