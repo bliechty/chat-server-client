@@ -10,13 +10,20 @@ let server = net.createServer(client => {
     users.push(client);
     numberOfTotalUsers++;
     writeMessageToAllOtherUsers(`${client.name} (${client.id}) connected`, client);
+    fs.appendFile("chat.log", `${client.name} (${client.id}) connected\n`, (err) => {
+        if (err) {
+            console.log(`Error occurred: ${err}`);
+        } else {
+            console.log("Chat logged to 'chat.log'");
+        }
+    });
     console.log(`${client.name} (${client.id}) connected`);
 
     client.on("data", data => {
         if (data === "quit\n") {
             client.end();
         } else {
-            fs.appendFile("chat.log", `${client.name} (${client.id}) said "${data.trim()}" to all other users\n`, (err) => {
+            fs.appendFile("chat.log", `${client.name} (${client.id}) said [${data.trim()}] to all other users\n`, (err) => {
                 if (err) {
                     console.log(`Error occurred: ${err}`);
                 } else {
@@ -32,12 +39,26 @@ let server = net.createServer(client => {
 
     client.on("end", () => {
         writeMessageToAllOtherUsers(`${client.name} (${client.id}) disconnected`, client);
+        fs.appendFile("chat.log", `${client.name} (${client.id}) disconnected\n`, (err) => {
+            if (err) {
+                console.log(`Error occurred: ${err}`);
+            } else {
+                console.log("Chat logged to 'chat.log'");
+            }
+        });
         console.log(`${client.name} (${client.id}) disconnected`);
         users = users.filter(user => user.id !== client.id);
     });
 });
 
 server.listen(3000, () => {
+    fs.appendFile("chat.log", "Server connected\n", (err) => {
+        if (err) {
+            console.log(`Error occurred: ${err}`);
+        } else {
+            console.log("Chat logged to 'chat.log'");
+        }
+    });
     console.log("Server is running");
 });
 
@@ -60,6 +81,13 @@ function writeMessageToAllOtherUsers(message, client) {
 process.stdin.setEncoding("utf-8");
 process.stdin.on("data", data => {
     if (data === "quit\n") {
-        process.exit();
+        fs.appendFile("chat.log", "Server disconnected\n", (err) => {
+            if (err) {
+                console.log(`Error occurred: ${err}`);
+            } else {
+                console.log("Chat logged to 'chat.log'");
+                process.exit();
+            }
+        });
     }
 });
