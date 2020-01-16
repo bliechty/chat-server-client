@@ -23,13 +23,7 @@ let server = net.createServer(client => {
         if (data === "quit\n") {
             client.end();
         } else {
-            fs.appendFile("chat.log", `${client.name} (${client.id}) said [${data.trim()}] to all other users\n`, (err) => {
-                if (err) {
-                    console.log(`Error occurred: ${err}`);
-                } else {
-                    console.log("Chat logged to 'chat.log'");
-                }
-            });
+            writeToChatLog(`${client.name} (${client.id}) said [${data.trim()}] to all other users\n`);
             client.write("Message sent to all other users");
             writeMessageToAllOtherUsers(`Message from ${client.name} (${client.id}): ${data}`, client);
             console.log(`Message sent from ${client.name} (${client.id}) to all other users`);
@@ -39,26 +33,14 @@ let server = net.createServer(client => {
 
     client.on("end", () => {
         writeMessageToAllOtherUsers(`${client.name} (${client.id}) disconnected`, client);
-        fs.appendFile("chat.log", `${client.name} (${client.id}) disconnected\n`, (err) => {
-            if (err) {
-                console.log(`Error occurred: ${err}`);
-            } else {
-                console.log("Chat logged to 'chat.log'");
-            }
-        });
+        writeToChatLog(`${client.name} (${client.id}) disconnected\n`);
         console.log(`${client.name} (${client.id}) disconnected`);
         users = users.filter(user => user.id !== client.id);
     });
 });
 
 server.listen(3000, () => {
-    fs.appendFile("chat.log", "Server connected\n", (err) => {
-        if (err) {
-            console.log(`Error occurred: ${err}`);
-        } else {
-            console.log("Chat logged to 'chat.log'");
-        }
-    });
+    writeToChatLog("Server connected\n");
     console.log("Server is running");
 });
 
@@ -78,16 +60,22 @@ function writeMessageToAllOtherUsers(message, client) {
     }
 }
 
+function writeToChatLog(message, funct = () => {}) {
+    fs.appendFile("chat.log", message, (err) => {
+        if (err) {
+            console.log(`Error occurred: ${err}`);
+        } else {
+            console.log("Chat logged to 'chat.log'");
+            funct();
+        }
+    });
+}
+
 process.stdin.setEncoding("utf-8");
 process.stdin.on("data", data => {
     if (data === "quit\n") {
-        fs.appendFile("chat.log", "Server disconnected\n", (err) => {
-            if (err) {
-                console.log(`Error occurred: ${err}`);
-            } else {
-                console.log("Chat logged to 'chat.log'");
-                process.exit();
-            }
+        writeToChatLog("Server disconnected\n", () => {
+            process.exit();
         });
     }
 });
